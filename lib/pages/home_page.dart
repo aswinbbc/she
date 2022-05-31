@@ -16,9 +16,10 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_screen_lock/flutter_screen_lock.dart';
 import '../utils/constant.dart';
+import '../widgets/my_camera.dart';
 
 class HomePage extends StatefulWidget {
-  HomePage({Key? key}) : super(key: key);
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -37,6 +38,8 @@ class _HomePageState extends State<HomePage> {
     });
     super.initState();
   }
+
+  List<Person> numbers = [];
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +72,7 @@ class _HomePageState extends State<HomePage> {
                 child: BluetoothApp(
                     controller: bluetoothController,
                     onMessage: (message) {
-                      sendSms(locationData);
+                      sendSms(locationData, numbers);
                       show(message);
                       lockScreen();
                     }),
@@ -216,18 +219,24 @@ class _HomePageState extends State<HomePage> {
                             ? snapshot.data!['mobile']
                             : "no data",
                         click: () {
-                          Navigator.push<void>(
-                            context,
-                            MaterialPageRoute<void>(
-                              builder: (BuildContext context) =>
-                                  const MessagePage(),
-                            ),
-                          );
+                          // Navigator.push<void>(
+                          //   context,
+                          //   MaterialPageRoute<void>(
+                          //     builder: (BuildContext context) =>
+                          //         const MessagePage(),
+                          //   ),
+                          // );
                         },
                         icon: Icons.rounded_corner,
                         isRead: true,
                       ),
                     ),
+                    FloatingActionButton(onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => CameraPage()),
+                      );
+                    })
                   ],
                 ),
               )
@@ -247,6 +256,7 @@ class _HomePageState extends State<HomePage> {
       ];
     }
     final persons = snapshot.map((e) => Person.fromJson(jsonDecode(e)));
+    numbers = persons.toList();
     final widgets = persons
         .map((person) => ChatTile(
               imageUrl: 'assets/images/frnd.png',

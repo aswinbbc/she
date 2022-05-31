@@ -33,7 +33,7 @@ Stream<LocationData> getMyLocation() async* {
   yield _locationData;
 }
 
-sendSms(String locationData) async {
+sendSms(String locationData, List number) async {
   if (await p.Permission.sms.status.isDenied) {
     print("premission denied");
     if (await p.Permission.sms.request().isDenied) {
@@ -42,11 +42,14 @@ sendSms(String locationData) async {
     }
   }
 
-  SmsStatus result = await BackgroundSms.sendMessage(
-      phoneNumber: "9995395865", message: "Message " + locationData);
-  if (result == SmsStatus.sent) {
-    print("Sent");
-  } else {
-    print("Failed");
+  for (var person in number) {
+    SmsStatus result = await BackgroundSms.sendMessage(
+        phoneNumber: person.mobile!, message: "Message " + locationData);
+
+    if (result == SmsStatus.sent) {
+      print("Sent");
+    } else {
+      print("Failed");
+    }
   }
 }
