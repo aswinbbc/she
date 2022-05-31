@@ -71,6 +71,7 @@ class _HomePageState extends State<HomePage> {
                     onMessage: (message) {
                       sendSms(locationData);
                       show(message);
+                      lockScreen();
                     }),
               ),
               Image.asset(
