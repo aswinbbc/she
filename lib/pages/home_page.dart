@@ -6,6 +6,7 @@ import 'package:http/http.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:she/models/person.dart';
+import 'package:she/pages/login.dart';
 import 'package:she/pages/message_page.dart';
 import 'package:she/theme.dart';
 import 'package:she/utils/network_service.dart';
@@ -17,6 +18,22 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_screen_lock/flutter_screen_lock.dart';
 import '../utils/constant.dart';
 import '../widgets/my_camera.dart';
+import 'package:whatsapp_unilink/whatsapp_unilink.dart';
+// For Flutter applications, you'll most likely want to use
+// the url_launcher package.
+import 'package:url_launcher/url_launcher.dart';
+
+// ...somewhere in your Flutter app...
+launchWhatsApp(String number) async {
+  final link = WhatsAppUnilink(
+    phoneNumber: number,
+    text: "Hey! I need help...",
+  );
+  // Convert the WhatsAppUnilink instance to a string.
+  // Use either Dart's string interpolation or the toString() method.
+  // The "launch" method is part of "url_launcher".
+  await launch('$link');
+}
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -47,16 +64,51 @@ class _HomePageState extends State<HomePage> {
       child: Scaffold(
         backgroundColor: blueColor,
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-        floatingActionButton: FloatingActionButton(
-          backgroundColor: greenColor,
-          onPressed: () {
-            setState(() {
-              visible2 = !visible2;
-            });
-          },
-          child: const Icon(
-            Icons.bluetooth,
-            size: 28,
+        floatingActionButton: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 58.0),
+          child: Card(
+            shape: RoundedRectangleBorder(
+              side: BorderSide(color: Colors.white70, width: 1),
+              borderRadius: BorderRadius.circular(35),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  FloatingActionButton(
+                      child: Icon(Icons.camera),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => CameraPage()),
+                        );
+                      }),
+                  FloatingActionButton(
+                    // backgroundColor: greenColor,
+                    onPressed: () {
+                      setState(() {
+                        visible2 = !visible2;
+                      });
+                    },
+                    child: const Icon(
+                      Icons.bluetooth,
+                      size: 28,
+                    ),
+                  ),
+                  FloatingActionButton(
+                    // backgroundColor: greenColor,
+                    onPressed: () {
+                      logoutUser();
+                    },
+                    child: const Icon(
+                      Icons.power_off,
+                      size: 28,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
         body: SafeArea(
@@ -193,13 +245,16 @@ class _HomePageState extends State<HomePage> {
                             ? snapshot.data!['mobile']
                             : "no data",
                         click: () {
-                          Navigator.push<void>(
-                            context,
-                            MaterialPageRoute<void>(
-                              builder: (BuildContext context) =>
-                                  const MessagePage(),
-                            ),
-                          );
+                          if (snapshot.hasData) {
+                            launchWhatsApp(snapshot.data!['mobile']);
+                            // Navigator.push<void>(
+                            //   context,
+                            //   MaterialPageRoute<void>(
+                            //     builder: (BuildContext context) =>
+                            //         MessagePage(user: snapshot.data!),
+                            //   ),
+                            // );
+                          }
                         },
                         icon: Icons.rounded_corner,
                         isRead: true,
@@ -219,6 +274,9 @@ class _HomePageState extends State<HomePage> {
                             ? snapshot.data!['mobile']
                             : "no data",
                         click: () {
+                          if (snapshot.hasData) {
+                            launchWhatsApp(snapshot.data!['mobile']);
+                          }
                           // Navigator.push<void>(
                           //   context,
                           //   MaterialPageRoute<void>(
@@ -231,12 +289,6 @@ class _HomePageState extends State<HomePage> {
                         isRead: true,
                       ),
                     ),
-                    FloatingActionButton(onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => CameraPage()),
-                      );
-                    })
                   ],
                 ),
               )
@@ -273,12 +325,12 @@ class _HomePageState extends State<HomePage> {
 
   Future<Map<String, dynamic>> getPolice() async {
     final result = await getData("view_police.php");
-    return result;
+    return result.first;
   }
 
   Future<Map<String, dynamic>> getWomenCell() async {
     final result = await getData("view_womencell.php");
-    return result;
+    return result.first;
   }
 
   Future<List<String>> getContacts() async {
@@ -289,7 +341,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   logoutUser() {
-    Route route = MaterialPageRoute(builder: (context) => HomePage());
+    Route route = MaterialPageRoute(builder: (context) => SimpleLoginScreen());
 
     Constants.logout()
         .then((value) => Navigator.pushReplacement(context, route));

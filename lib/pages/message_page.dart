@@ -6,8 +6,8 @@ import 'package:location/location.dart';
 import '../utils/utils.dart';
 
 class MessagePage extends StatefulWidget {
-  final String? user;
-  const MessagePage({Key? key, this.user}) : super(key: key);
+  final Map<String, dynamic> user;
+  const MessagePage({Key? key, required this.user}) : super(key: key);
 
   @override
   State<MessagePage> createState() => _MessagePageState();
@@ -75,11 +75,11 @@ class _MessagePageState extends State<MessagePage> {
                     Column(
                       children: [
                         Text(
-                          'Moba Analog',
+                          widget.user['name'],
                           style: titleTextStyle,
                         ),
                         Text(
-                          '14,209 members',
+                          widget.user['email'],
                           style: subtitleTextStyle,
                         )
                       ],
@@ -106,6 +106,8 @@ class _MessagePageState extends State<MessagePage> {
       ),
     );
   }
+
+  sendMessage() async {}
 
   recieverBubble(String message) => ChatBubble(
       imageUrl: 'assets/images/friend1.png', text: message, time: '11.22');
